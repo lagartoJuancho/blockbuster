@@ -11,8 +11,8 @@ import javax.inject.Inject
 class MovieRepositoryImpl @Inject constructor(
     private val api: MoviesApiService
 ) : MoviesRepository {
-    override suspend fun fetchPopularMovies(): List<MovieD> =
-        api.fetchPopularMovies("US").results.map { it.toDomainModel() }
+    override suspend fun fetchPopularMovies(region: String): List<MovieD> =
+        api.fetchPopularMovies(region).results.map { it.toDomainModel() }
 
 
     override suspend fun getMovieById(id: String): MovieD = api.getMovieById(id).toDomainModel()

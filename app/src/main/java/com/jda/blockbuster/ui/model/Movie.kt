@@ -18,7 +18,7 @@ fun MovieD.toUiModel() = Movie(
     releaseDate = releaseDate
 )
 
-val movies = (1..100).map {
+val mockMovies = (1..100).map {
     Movie(
         id = it.toString(),
         title = "Movie $it",

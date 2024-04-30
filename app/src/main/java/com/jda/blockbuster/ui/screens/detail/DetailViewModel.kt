@@ -1,4 +1,4 @@
-package com.jda.blockbuster.ui.screens.home
+package com.jda.blockbuster.ui.screens.detail
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,26 +13,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class DetailViewModel @Inject constructor(
     private val repository: MoviesRepository
 ): ViewModel() {
 
     var state by mutableStateOf(UiState())
         private set
 
-    fun onUiReady(region: String) {
+    fun getMovieById(id: String) {
+        state = UiState(isLoading = true)
         viewModelScope.launch {
-            state = UiState(isLoading = true)
-            val movieList = repository.fetchPopularMovies(region).map { movie ->
-                movie.toUiModel()
-            }
-            state= UiState(isLoading = false, movies = movieList)
+            val movie = repository.getMovieById(id)
+            state = UiState(isLoading = false, movie = movie.toUiModel())
         }
     }
     data class UiState(
         val isLoading: Boolean = true,
-        val movies: List<Movie> = emptyList(),
-        val isScrolled: Boolean = false,
-        val appBarrIsCollapsed: Boolean = false
+        val movie: Movie? = null
     )
 }

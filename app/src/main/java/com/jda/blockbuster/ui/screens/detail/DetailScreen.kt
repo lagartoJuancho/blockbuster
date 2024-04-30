@@ -15,25 +15,36 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.jda.blockbuster.ui.model.Movie
-import com.jda.blockbuster.ui.model.movies
+import com.jda.blockbuster.ui.common.Loading
+import com.jda.blockbuster.ui.model.mockMovies
 import com.jda.blockbuster.ui.screens.commons.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(onBackPressed: () -> Unit, id: String) {
-    val movie = movies[1]
+fun DetailScreen(
+    onBackPressed: () -> Unit,
+    id: String,
+    viewModel: DetailViewModel = hiltViewModel()
+) {
+    val state = viewModel.state
+    LaunchedEffect(id) {
+        viewModel.getMovieById(id)
+    }
     Screen {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = movie.title)
+                        Text(text = state.movie?.title ?: "")
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackPressed) {
@@ -42,31 +53,39 @@ fun DetailScreen(onBackPressed: () -> Unit, id: String) {
                                 contentDescription = "Back"
                             )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors().copy(
+                        containerColor = Color.Transparent,
+                    )
                 )
             }
         ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                AsyncImage(
-                    model = movie.poster,
-                    contentDescription = movie.title,
-                    contentScale = ContentScale.Crop,
+            if (state.isLoading) {
+                Loading(padding)
+            } else {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16 / 9f)
-                )
+                        .padding(padding)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    state.movie?.let {
+                        AsyncImage(
+                            model = state.movie.poster,
+                            contentDescription = state.movie.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16 / 9f)
+                        )
 
-                Text(
-                    text = movie.title,
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.headlineMedium
-                )
+                        Text(
+                            text = state.movie.title ?: "",
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                }
             }
         }
     }
-
 }
